@@ -73,7 +73,7 @@ class CellView extends StatelessWidget {
       crossAxisCount: 3,
       children: items
           .asMap()
-          .map((index, item) {
+          .map((index, itemModel) {
             return MapEntry(
                 index,
                 GestureDetector(
@@ -81,8 +81,9 @@ class CellView extends StatelessWidget {
                     model.fillFromTable(itemIndex, index);
                   },
                   child: Card(
+                    color: itemModel.isSelected ? Colors.red : Colors.white,
                     child: Center(
-                      child: Text(item == 0 ? "" : '$item'),
+                      child: Text((itemModel.item == 0) ? "" : '${itemModel.item}'),
                     ),
                   ),
                 ));

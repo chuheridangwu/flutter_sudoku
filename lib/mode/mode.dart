@@ -5,6 +5,7 @@ import 'package:scoped_model/scoped_model.dart';
 class GameModel extends Model {
   List<List> dataSource = []; // 九宫格数组
   List<OperateModel> operates = []; //九宫格按钮的操作
+  List loves = ["", "", ""]; // 爱心
   int selectedOperateItem = 0; // 选中的操作符
 
   int _level = 2; // 难度等级 显示的间隔量级，可表示难易程度，值越大越不能保证唯一性
@@ -33,16 +34,36 @@ class GameModel extends Model {
 
     List itemAry = items[itemIndex]; // 获取单元格的数组
 
+    for (List itemList in items) {
+      for (ItemModel aaa in itemList) {
+        aaa.isSelected = false;
+      }
+    }
+
+    if (selectedOperateItem == 0) {
+      for (ItemModel item in rowAry) {
+        item.isSelected = true;
+      }
+      for (ItemModel item in lowAry) {
+        item.isSelected = true;
+      }
+      for (ItemModel item in itemAry) {
+        item.isSelected = true;
+      }
+      notifyListeners();
+      return;
+    }
+
     // 如果选中的数字 不在 行、列、单元格内，则是正确的
-    if (rowAry.contains(selectedOperateItem) ||
-        lowAry.contains(selectedOperateItem) ||
-        itemAry.contains(selectedOperateItem)) {
+    if (_isInclude(itemAry, rowAry, lowAry)) {
       print("已经包含了");
     } else {
-      itemAry.replaceRange(index, index + 1, [selectedOperateItem]);
-      // print("items: $items");
-      rowAry.add(selectedOperateItem);
-      itemAry.add(selectedOperateItem);
+      ItemModel _itemModel = itemAry[index];
+      _itemModel.item = selectedOperateItem;
+      _itemModel.isSelected = true;
+      // itemAry.replaceRange(index, index + 1, [_itemModel]);
+      rowAry.add(_itemModel);
+      itemAry.add(_itemModel);
       for (var operate in operates) {
         if (selectedOperateItem == operate.item) {
           operate.hideCount -= 1;
@@ -51,6 +72,27 @@ class GameModel extends Model {
     }
 
     notifyListeners();
+  }
+
+  bool _isInclude(List itemAry, List rowAry, List lowAry) {
+    for (ItemModel model in itemAry) {
+      if (model.item == selectedOperateItem) {
+        return true;
+      }
+    }
+
+    for (ItemModel model in rowAry) {
+      if (model.item == selectedOperateItem) {
+        return true;
+      }
+    }
+
+    for (ItemModel model in lowAry) {
+      if (model.item == selectedOperateItem) {
+        return true;
+      }
+    }
+    return false;
   }
 
   static GameModel of(BuildContext context) {
@@ -109,36 +151,38 @@ class GameModel extends Model {
         }
       }
 
-      rows[row].add(title);
-      lows[low].add(title);
+      ItemModel itemModel = ItemModel(title, false);
+
+      rows[row].add(itemModel);
+      lows[low].add(itemModel);
 
       if (row1 && low1) {
         // item1
-        items[0].add(title);
+        items[0].add(itemModel);
       } else if (row1 && low2) {
         // item2
-        items[1].add(title);
+        items[1].add(itemModel);
       } else if (row1 && low3) {
         // item3
-        items[2].add(title);
+        items[2].add(itemModel);
       } else if (row2 && low1) {
         // item4
-        items[3].add(title);
+        items[3].add(itemModel);
       } else if (row2 && low2) {
         // item5
-        items[4].add(title);
+        items[4].add(itemModel);
       } else if (row2 && low3) {
         // item6
-        items[5].add(title);
+        items[5].add(itemModel);
       } else if (row3 && low1) {
         // item7
-        items[6].add(title);
+        items[6].add(itemModel);
       } else if (row3 && low2) {
         // item8
-        items[7].add(title);
+        items[7].add(itemModel);
       } else if (row3 && low3) {
         // item9
-        items[8].add(title);
+        items[8].add(itemModel);
       }
     }
   }
@@ -259,4 +303,10 @@ class OperateModel {
   int item = 0;
   int hideCount = 9;
   bool isSelected = false;
+}
+
+class ItemModel {
+  int item = 0;
+  bool isSelected = false;
+  ItemModel(this.item, this.isSelected);
 }
