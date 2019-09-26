@@ -13,6 +13,46 @@ class GameModel extends Model {
     _initData();
   }
 
+  void changeSelctedOperateitem() {
+    for (var opera in operates) {
+      opera.isSelected = opera.item == selectedOperateItem ? true : false;
+    }
+    notifyListeners();
+  }
+
+  // itemIndex: 单元格的索引   index: 单元格内索引
+  void fillFromTable(int itemIndex, int index) {
+    int row = index ~/ 3; // 单元格内的 列
+    int low = index % 3; // 单元格内的 行
+
+    int rowIndex = row + 3 * (itemIndex ~/ 3); // 获取在九宫格内的行索引
+    List rowAry = rows[rowIndex];
+
+    int lowIndex = low + 3 * (itemIndex % 3); // 获取在九宫格内的列索引
+    List lowAry = lows[lowIndex];
+
+    List itemAry = items[itemIndex]; // 获取单元格的数组
+
+    // 如果选中的数字 不在 行、列、单元格内，则是正确的
+    if (rowAry.contains(selectedOperateItem) ||
+        lowAry.contains(selectedOperateItem) ||
+        itemAry.contains(selectedOperateItem)) {
+      print("已经包含了");
+    } else {
+      itemAry.replaceRange(index, index + 1, [selectedOperateItem]);
+      // print("items: $items");
+      rowAry.add(selectedOperateItem);
+      itemAry.add(selectedOperateItem);
+      for (var operate in operates) {
+        if (selectedOperateItem == operate.item) {
+          operate.hideCount -= 1;
+        }
+      }
+    }
+
+    notifyListeners();
+  }
+
   static GameModel of(BuildContext context) {
     return ScopedModel.of<GameModel>(context);
   }
@@ -110,13 +150,6 @@ class GameModel extends Model {
       return _creatRandomTitle(ary);
     }
     return random;
-  }
-
-  void changeSelcted() {
-    for (var opera in operates) {
-      opera.isSelected = opera.item == selectedOperateItem ? true : false;
-    }
-    notifyListeners();
   }
 
   //能够生���362880个不同的随机矩阵 (9的阶乘), (这里应该只是换顺序)

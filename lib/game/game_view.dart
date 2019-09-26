@@ -45,12 +45,18 @@ class GameListView extends StatelessWidget {
       crossAxisCount: 3,
       crossAxisSpacing: 5,
       mainAxisSpacing: 5,
-      children: model.items.map((items) {
-        return Container(
-          child: CellView(items),
-          color: Colors.grey,
-        );
-      }).toList(),
+      children: model.items
+          .asMap()
+          .map((itemIndex, items) {
+            return MapEntry(
+                itemIndex,
+                Container(
+                  child: CellView(items, itemIndex),
+                  color: Colors.grey,
+                ));
+          })
+          .values
+          .toList(),
     );
   }
 }
@@ -58,21 +64,31 @@ class GameListView extends StatelessWidget {
 // 单元格widget
 class CellView extends StatelessWidget {
   final List items;
-  CellView(this.items);
+  final int itemIndex; // 单元格索引
+  CellView(this.items, this.itemIndex);
   @override
   Widget build(BuildContext context) {
+    GameModel model = GameModel.of(context);
     return GridView.count(
       crossAxisCount: 3,
-      children: items.map((item) {
-        return GestureDetector(
-          onTap: () {},
-          child: Card(
-            child: Center(
-              child: Text(item == 0 ? "" :'$item'),
-            ),
-          ),
-        );
-      }).toList(),
+      children: items
+          .asMap()
+          .map((index, item) {
+            return MapEntry(
+                index,
+                GestureDetector(
+                  onTap: () {
+                    model.fillFromTable(itemIndex, index);
+                  },
+                  child: Card(
+                    child: Center(
+                      child: Text(item == 0 ? "" : '$item'),
+                    ),
+                  ),
+                ));
+          })
+          .values
+          .toList(),
     );
   }
 }
@@ -120,22 +136,28 @@ class ItemView extends StatelessWidget {
             child: GestureDetector(
               onTap: () {
                 model.selectedOperateItem = operate.item;
-                model.changeSelcted();
+                model.changeSelctedOperateitem();
               },
-              child: operate.hideCount == 0 ? Container() : Stack(
-                children: <Widget>[
-                  Card(
-                    color: operate.isSelected ? Colors.red : Colors.white,
-                      child: Center(
-                    child: Text('${operate.item}'),
-                  )),
-                  Positioned(
-                    right: 2,
-                    top: 2,
-                    child: Text("${operate.hideCount}",style: TextStyle(fontSize: 10),),
-                  )
-                ],
-              ),
+              child: operate.hideCount == 0
+                  ? Container()
+                  : Stack(
+                      children: <Widget>[
+                        Card(
+                            color:
+                                operate.isSelected ? Colors.red : Colors.white,
+                            child: Center(
+                              child: Text('${operate.item}'),
+                            )),
+                        Positioned(
+                          right: 2,
+                          top: 2,
+                          child: Text(
+                            "${operate.hideCount}",
+                            style: TextStyle(fontSize: 10),
+                          ),
+                        )
+                      ],
+                    ),
             ),
           );
         }).toList(),
