@@ -1,16 +1,20 @@
-# flutter_sudoku
+# 数独逻辑
+标准的九宫格，共9行9列9个单元格，行 、 列 、 单元格没有重复的数字，就是成功
 
-A new Flutter project.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+/**
+ *  行、列、单个单元格如果不包含就算正确
+ * 
+ * 将9个数组分成 行 和列 各三排数组  假设 行：[A,B,C]  列：[D,E,F]
+ * 首先 确认 当前点击的item在第几个单元格中，知道单元格就知道在第几个行和列的数组中。假设在第5个单元格，比较 行就比较 B数组， 比较列就比较E数组
+ *  
+ * 行的计算方式： %3知道在第几行，然后比较B数组中%3的值，看是否有重复，有重复则代表失败
+ * 
+ * 列的计算方式： %3知道在第几列，然后比较数组中%3的值，看是否有重复，有重复则代表失败
+ * 
+ * 单元格计算方: 获取第几个单元格，知道单元格的值就行了
+ * 
+ * 
+ * 列 A: 数组比较 i % 3 == 0, i % 3 == 1 , i % 3 == 2
+ * 列 D： 数组比较 1 %3 == 1， 1 %3 == 2， i % 3 == 0
+ */
