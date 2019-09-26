@@ -45,7 +45,7 @@ class GameListView extends StatelessWidget {
       crossAxisCount: 3,
       crossAxisSpacing: 5,
       mainAxisSpacing: 5,
-      children: model.dataSource.map((items) {
+      children: model.items.map((items) {
         return Container(
           child: CellView(items),
           color: Colors.grey,
@@ -68,7 +68,7 @@ class CellView extends StatelessWidget {
           onTap: () {},
           child: Card(
             child: Center(
-              child: Text('$item'),
+              child: Text(item == 0 ? "" :'$item'),
             ),
           ),
         );
@@ -113,16 +113,29 @@ class ItemView extends StatelessWidget {
       right: 0.0,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: model.items.map((item) {
+        children: model.operates.map((operate) {
           return Container(
             height: 40.0,
             width: 40.0,
             child: GestureDetector(
-              onTap: () {},
-              child: Card(
-                  child: Center(
-                child: Text('$item'),
-              )),
+              onTap: () {
+                model.selectedOperateItem = operate.item;
+                model.changeSelcted();
+              },
+              child: operate.hideCount == 0 ? Container() : Stack(
+                children: <Widget>[
+                  Card(
+                    color: operate.isSelected ? Colors.red : Colors.white,
+                      child: Center(
+                    child: Text('${operate.item}'),
+                  )),
+                  Positioned(
+                    right: 2,
+                    top: 2,
+                    child: Text("${operate.hideCount}",style: TextStyle(fontSize: 10),),
+                  )
+                ],
+              ),
             ),
           );
         }).toList(),
