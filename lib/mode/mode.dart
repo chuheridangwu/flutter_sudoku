@@ -3,10 +3,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class GameModel extends Model {
-  List<List> dataSource = []; // 九宫格数组
   List<OperateModel> operates = []; //九宫格按钮的操作
   List loves = ["", "", ""]; // 爱心
   int selectedOperateItem = 0; // 选中的操作符
+
+  List<Map> _removeItem1 = []; // 被移除的item
+  List<Map> _removeItem2 = []; // 移除之后的item
+  List<ItemModel> _dataSource = []; // 储存生成的九宫格数组
 
   int _level = 2; // 难度等级 显示的间隔量级，可表示难易程度，值越大越不能保证唯一性
 
@@ -14,11 +17,48 @@ class GameModel extends Model {
     _initData();
   }
 
+// 更换选中的操作按钮
   void changeSelctedOperateitem() {
     for (var opera in operates) {
       opera.isSelected = opera.item == selectedOperateItem ? true : false;
     }
     notifyListeners();
+  }
+
+  // 撤回
+  void withdrawItem() {
+    if (_removeItem2.length <= 0) {
+      return;
+    }
+    Map map = _removeItem2.last;
+    items[map.keys.first].replaceRange(
+        map.values.first, map.values.first + 1, [ItemModel(0, false)]);
+    _removeItem2.removeLast();
+
+    for (var operate in operates) {
+      if (map["itemModel"].item == operate.item) {
+        operate.hideCount += 1;
+      }
+    }
+    notifyListeners();
+  }
+
+  void withdrawalItem() {
+    if (_removeItem1.length > _removeItem2.length) {
+      Map map = _removeItem1[_removeItem2.length];
+      ItemModel model1 = items[map.keys.first][map.values.first];
+      ItemModel model2 = map["itemModel"];
+      model1.item = model2.item;
+      model1.isSelected = model2.isSelected;
+      _removeItem2.add(map);
+
+      for (var operate in operates) {
+      if (model2.item == operate.item) {
+        operate.hideCount -= 1;
+      }
+    }
+      notifyListeners();
+    }
   }
 
   // itemIndex: 单元格的索引   index: 单元格内索引
@@ -34,13 +74,19 @@ class GameModel extends Model {
 
     List itemAry = items[itemIndex]; // 获取单元格的数组
 
+    ItemModel _itemModel = itemAry[index]; // 具体选择的单元格
+
     for (List itemList in items) {
       for (ItemModel aaa in itemList) {
         aaa.isSelected = false;
+        if (_itemModel.item != 0 && _itemModel.item == aaa.item) {
+          aaa.isSelected = true;
+        }
       }
     }
 
-    if (selectedOperateItem == 0) {
+    // 当选中的单元值 == 0 && 没有选中任何值时，显示提示(这里还有优化的地方)
+    if (_itemModel.item == 0 && selectedOperateItem == 0) {
       for (ItemModel item in rowAry) {
         item.isSelected = true;
       }
@@ -58,15 +104,21 @@ class GameModel extends Model {
     if (_isInclude(itemAry, rowAry, lowAry)) {
       print("已经包含了");
     } else {
-      ItemModel _itemModel = itemAry[index];
       _itemModel.item = selectedOperateItem;
-      _itemModel.isSelected = true;
-      // itemAry.replaceRange(index, index + 1, [_itemModel]);
       rowAry.add(_itemModel);
       itemAry.add(_itemModel);
+
+      _removeItem1 = List.from(_removeItem2);
+      _removeItem1.add({itemIndex: index, "itemModel": _itemModel});
+      _removeItem2.add({itemIndex: index, "itemModel": _itemModel});
+
       for (var operate in operates) {
         if (selectedOperateItem == operate.item) {
           operate.hideCount -= 1;
+          // 如果一个item已经全部填写完了，选中的item则 == 0
+          if (operate.hideCount == 0) {
+            selectedOperateItem = 0;
+          }
         }
       }
     }
@@ -74,6 +126,7 @@ class GameModel extends Model {
     notifyListeners();
   }
 
+//  输入的值是否包含在  行 列 单元格内
   bool _isInclude(List itemAry, List rowAry, List lowAry) {
     for (ItemModel model in itemAry) {
       if (model.item == selectedOperateItem) {
@@ -140,18 +193,19 @@ class GameModel extends Model {
       bool low3 = low == 6 || low == 7 || low == 8;
 
       int title = _changeTitleWithAry(randomAry, rps[j]);
+      ItemModel itemModel = ItemModel(title, false);
+
+      _dataSource.add(itemModel);
 
       // 随机隐藏个数,计算每个数现有多少个
       if (Random().nextInt(_level) != 1) {
-        title = 0;
+        itemModel.item = 0;
       } else {
         OperateModel model = operates[title - 1];
         if (model.item == title) {
           model.hideCount -= 1;
         }
       }
-
-      ItemModel itemModel = ItemModel(title, false);
 
       rows[row].add(itemModel);
       lows[low].add(itemModel);

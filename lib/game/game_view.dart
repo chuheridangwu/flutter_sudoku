@@ -83,7 +83,8 @@ class CellView extends StatelessWidget {
                   child: Card(
                     color: itemModel.isSelected ? Colors.red : Colors.white,
                     child: Center(
-                      child: Text((itemModel.item == 0) ? "" : '${itemModel.item}'),
+                      child: Text(
+                          (itemModel.item == 0) ? "" : '${itemModel.item}'),
                     ),
                   ),
                 ));
@@ -98,6 +99,7 @@ class CellView extends StatelessWidget {
 class OperatingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    GameModel model = GameModel.of(context);
     return Positioned(
       left: 0.0,
       right: 0.0,
@@ -106,11 +108,15 @@ class OperatingView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           FlatButton(
-            onPressed: () {},
+            onPressed: () {
+              model.withdrawItem();
+            },
             child: Text('撤回'),
           ),
           FlatButton(
-            onPressed: () {},
+            onPressed: () {
+              model.withdrawalItem();
+            },
             child: Text('回撤'),
           ),
         ],
