@@ -3,15 +3,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class GameModel extends Model {
+  int _level = 2; // 难度等级 显示的间隔量级，可表示难易程度，值越大越不能保证唯一性
+  VoidCallback snpTipBack;
+
   List<OperateModel> operates = []; //九宫格按钮的操作
-  List loves = ["", "", ""]; // 爱心
   int selectedOperateItem = 0; // 选中的操作符
 
   List<Map> _removeItem1 = []; // 被移除的item
   List<Map> _removeItem2 = []; // 移除之后的item
   List<ItemModel> _dataSource = []; // 储存生成的九宫格数组
-
-  int _level = 2; // 难度等级 显示的间隔量级，可表示难易程度，值越大越不能保证唯一性
+  bool isEdit = false; // 是否是编辑模式
 
   GameModel() {
     _initData();
@@ -19,8 +20,58 @@ class GameModel extends Model {
 
 // 更换选中的操作按钮
   void changeSelctedOperateitem() {
-    for (var opera in operates) {
-      opera.isSelected = opera.item == selectedOperateItem ? true : false;
+    if (isEdit) {
+      int row = _index ~/ 3; // 单元格内的 列
+      int low = _index % 3; // 单元格内的 行
+
+      int rowIndex = row + 3 * (_itemIndex ~/ 3); // 获取在九宫格内的行索引
+      List rowAry = rows[rowIndex];
+
+      int lowIndex = low + 3 * (_itemIndex % 3); // 获取在九宫格内的列索引
+      List lowAry = lows[lowIndex];
+
+      List itemAry = items[_itemIndex]; // 获取单元格的数组
+
+      ItemModel _itemModel = itemAry[_index]; // 具体选择的单元格
+
+       if (_isInclude(itemAry, rowAry, lowAry)) {
+        snpTipBack();
+      } else {
+        _itemModel.item = selectedOperateItem;
+        rowAry.add(_itemModel);
+        itemAry.add(_itemModel);
+
+        _removeItem1 = List.from(_removeItem2);
+        ItemModel mapModel = ItemModel(_itemModel.item, _itemModel.isSelected);
+        _removeItem1.add({_itemIndex: _index, "itemModel": mapModel});
+        _removeItem2.add({_itemIndex: _index, "itemModel": mapModel});
+
+        // 下面的item次数-1
+        for (var operate in operates) {
+          if (selectedOperateItem == operate.item) {
+            operate.hideCount -= 1;
+            // 如果一个item已经全部填写完了，选中的item则 == 0
+            if (operate.hideCount == 0) {
+              selectedOperateItem = 0;
+            }
+          }
+        }
+      }
+
+    } else {
+      // 对选中的item进行提示
+      for (var opera in operates) {
+        opera.isSelected = opera.item == selectedOperateItem ? true : false;
+      }
+
+      for (List itemList in items) {
+        for (ItemModel aaa in itemList) {
+          aaa.isSelected = false;
+          if (aaa.item == selectedOperateItem) {
+            aaa.isSelected = true;
+          }
+        }
+      }
     }
     notifyListeners();
   }
@@ -31,8 +82,10 @@ class GameModel extends Model {
       return;
     }
     Map map = _removeItem2.last;
+    ItemModel model = items[map.keys.first][map.values.first];
+    model.item = 0;
     items[map.keys.first].replaceRange(
-        map.values.first, map.values.first + 1, [ItemModel(0, false)]);
+        map.values.first, map.values.first + 1, [model]);
     _removeItem2.removeLast();
 
     for (var operate in operates) {
@@ -43,6 +96,7 @@ class GameModel extends Model {
     notifyListeners();
   }
 
+  // 回撤
   void withdrawalItem() {
     if (_removeItem1.length > _removeItem2.length) {
       Map map = _removeItem1[_removeItem2.length];
@@ -53,16 +107,22 @@ class GameModel extends Model {
       _removeItem2.add(map);
 
       for (var operate in operates) {
-      if (model2.item == operate.item) {
-        operate.hideCount -= 1;
+        if (model2.item == operate.item) {
+          operate.hideCount -= 1;
+        }
       }
-    }
       notifyListeners();
     }
   }
 
+  int _itemIndex = 0;
+  int _index = 0;
+
   // itemIndex: 单元格的索引   index: 单元格内索引
   void fillFromTable(int itemIndex, int index) {
+    _itemIndex = itemIndex;
+    _index = index;
+
     int row = index ~/ 3; // 单元格内的 列
     int low = index % 3; // 单元格内的 行
 
@@ -85,41 +145,29 @@ class GameModel extends Model {
       }
     }
 
-    // 当选中的单元值 == 0 && 没有选中任何值时，显示提示(这里还有优化的地方)
-    if (_itemModel.item == 0 && selectedOperateItem == 0) {
-      for (ItemModel item in rowAry) {
-        item.isSelected = true;
+    if (isEdit) {
+      // 如果是编辑模式，取消下面item所有的点击效果
+      for (var opera in operates) {
+        opera.isSelected = false;
       }
-      for (ItemModel item in lowAry) {
-        item.isSelected = true;
-      }
-      for (ItemModel item in itemAry) {
-        item.isSelected = true;
-      }
-      notifyListeners();
-      return;
-    }
-
-    // 如果选中的数字 不在 行、列、单元格内，则是正确的
-    if (_isInclude(itemAry, rowAry, lowAry)) {
-      print("已经包含了");
-    } else {
-      _itemModel.item = selectedOperateItem;
-      rowAry.add(_itemModel);
-      itemAry.add(_itemModel);
-
-      _removeItem1 = List.from(_removeItem2);
-      _removeItem1.add({itemIndex: index, "itemModel": _itemModel});
-      _removeItem2.add({itemIndex: index, "itemModel": _itemModel});
-
-      for (var operate in operates) {
-        if (selectedOperateItem == operate.item) {
-          operate.hideCount -= 1;
-          // 如果一个item已经全部填写完了，选中的item则 == 0
-          if (operate.hideCount == 0) {
-            selectedOperateItem = 0;
-          }
+      // 当选中的单元值 == 0 ，显示提示(这里还有优化的地方)
+      if (_itemModel.item == 0) {
+        for (ItemModel item in rowAry) {
+          item.isSelected = true;
         }
+        for (ItemModel item in lowAry) {
+          item.isSelected = true;
+        }
+        // for (ItemModel item in itemAry) {
+        //   item.isSelected = true;
+        // }
+      }
+
+    } else {
+      // 改变下面选择的item颜色
+      selectedOperateItem = _itemModel.item;
+      for (var opera in operates) {
+        opera.isSelected = opera.item == selectedOperateItem ? true : false;
       }
     }
 

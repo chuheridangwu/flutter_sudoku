@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sudoku/mode/mode.dart';
 import 'package:scoped_model/scoped_model.dart';
@@ -21,11 +22,8 @@ class _GameViewPageState extends State<GameViewPage> {
               return SafeArea(
                   child: Stack(
                 children: <Widget>[
-                  Positioned(
-                    top: 12.0,
-                    child: Container(),
-                  ),
                   GameListView(),
+                  LoveView(),
                   OperatingView(),
                   ItemView(),
                 ],
@@ -41,6 +39,30 @@ class GameListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     GameModel model = GameModel.of(context);
+    model.snpTipBack = () {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return  CupertinoAlertDialog(
+              title: Text('数据重复'),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('取消'),
+                  onPressed: (){
+                    Navigator.of(context).pop('点击了取消');
+                  },
+                ),
+                FlatButton(
+                  child: Text('确定'),
+                  onPressed: (){
+                    Navigator.of(context).pop('点击了确定');
+                  },
+                )
+              ],
+            );
+          
+          });
+    };
     return GridView.count(
       crossAxisCount: 3,
       crossAxisSpacing: 5,
@@ -78,6 +100,8 @@ class CellView extends StatelessWidget {
                 index,
                 GestureDetector(
                   onTap: () {
+                    model.selectedOperateItem = 0;
+                    model.isEdit = itemModel.item == 0 ? true : false;
                     model.fillFromTable(itemIndex, index);
                   },
                   child: Card(
@@ -172,3 +196,30 @@ class ItemView extends StatelessWidget {
     );
   }
 }
+
+
+class LoveView extends StatefulWidget {
+  @override
+  _State createState() => _State();
+}
+
+class _State extends State<LoveView> {
+    List _loves = ["", "", ""]; // 爱心
+
+    void removeLastLove(){
+      setState(() {
+        _loves.removeLast();
+      });
+    }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: _loves.map((item){
+        return IconButton(icon: Icon(Icons.live_tv),onPressed: (){},);
+      }).toList(),
+    );
+  }
+}
+
+
