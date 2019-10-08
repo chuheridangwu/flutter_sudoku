@@ -43,6 +43,7 @@ class GameListView extends StatelessWidget {
   Widget build(BuildContext context) {
     GameModel model = GameModel.of(context);
     model.snpTipBack = () {
+      print('11111');
       showDialog(
           context: context,
           builder: (context) {
@@ -214,7 +215,36 @@ class _State extends State<LoveView> {
 
   void removeLastLove() {
     setState(() {
-      _loves.removeLast();
+      if (_loves.length > 0) {
+        _loves.removeLast();
+      } 
+      
+      if (_loves.length == 0) {
+        showDialog(
+            context: context,
+            child: CupertinoAlertDialog(
+              title: Text('没有次数了'),
+              actions: <Widget>[
+                FlatButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    setState(() {
+                      _loves = ["", "", ""];
+                    });
+                  },
+                  child: Text('购买生命'),
+                ),
+                FlatButton(
+                  onPressed: (){
+                    Navigator.of(context).pop();
+                    GameModel model = GameModel.of(context);
+                    model.refreshData();
+                  },
+                  child: Text('再来一局'),
+                )
+              ],
+            ));
+      }
     });
   }
 
@@ -222,6 +252,7 @@ class _State extends State<LoveView> {
   Widget build(BuildContext context) {
     GameModel model = GameModel.of(context);
     model.snpTipBack = () {
+      print('2222');
       removeLastLove();
     };
     return Positioned(
@@ -240,6 +271,7 @@ class _State extends State<LoveView> {
   }
 }
 
+// 时间视图
 class TimeView extends StatefulWidget {
   @override
   _TimeViewState createState() => _TimeViewState();

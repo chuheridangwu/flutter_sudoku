@@ -34,7 +34,7 @@ class GameModel extends Model {
 
       ItemModel _itemModel = itemAry[_index]; // 具体选择的单元格
 
-       if (_isInclude(itemAry, rowAry, lowAry)) {
+      if (_isInclude(itemAry, rowAry, lowAry)) {
         snpTipBack();
       } else {
         _itemModel.item = selectedOperateItem;
@@ -57,7 +57,6 @@ class GameModel extends Model {
           }
         }
       }
-
     } else {
       // 对选中的item进行提示
       for (var opera in operates) {
@@ -84,8 +83,8 @@ class GameModel extends Model {
     Map map = _removeItem2.last;
     ItemModel model = items[map.keys.first][map.values.first];
     model.item = 0;
-    items[map.keys.first].replaceRange(
-        map.values.first, map.values.first + 1, [model]);
+    items[map.keys.first]
+        .replaceRange(map.values.first, map.values.first + 1, [model]);
     _removeItem2.removeLast();
 
     for (var operate in operates) {
@@ -162,7 +161,6 @@ class GameModel extends Model {
         //   item.isSelected = true;
         // }
       }
-
     } else {
       // 改变下面选择的item颜色
       selectedOperateItem = _itemModel.item;
@@ -198,6 +196,23 @@ class GameModel extends Model {
 
   static GameModel of(BuildContext context) {
     return ScopedModel.of<GameModel>(context);
+  }
+
+  void refreshData() {
+    _level = 2; // 难度等级 显示的间隔量级，可表示难易程度，值越大越不能保证唯一性
+    operates = []; //九宫格按钮的操作
+    selectedOperateItem = 0; // 选中的操作符
+
+    _removeItem1 = []; // 被移除的item
+    _removeItem2 = []; // 移除之后的item
+    _dataSource = []; // 储存生成的九宫格数组
+    isEdit = false; // 是否是编辑模式
+    items = [];
+    rows = [];
+    lows = [];
+
+    _initData();
+    notifyListeners();
   }
 
   void _initData() {
