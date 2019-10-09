@@ -15,6 +15,43 @@ class _GameViewPageState extends State<GameViewPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.pause),
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return Container(
+                        child: GestureDetector(
+                      child: Material(
+                        child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            IconButton(
+                              icon: Icon(Icons.close),
+                              onPressed: () {
+                                Navigator.of(context).popAndPushNamed('level');
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.add),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+
+                          ],
+                        )),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      },
+                    ));
+                  });
+            },
+          ),
+          // automaticallyImplyLeading: false,
           title: Text('Game'),
         ),
         body: ScopedModel(
@@ -217,8 +254,8 @@ class _State extends State<LoveView> {
     setState(() {
       if (_loves.length > 0) {
         _loves.removeLast();
-      } 
-      
+      }
+
       if (_loves.length == 0) {
         showDialog(
             context: context,
@@ -235,7 +272,7 @@ class _State extends State<LoveView> {
                   child: Text('购买生命'),
                 ),
                 FlatButton(
-                  onPressed: (){
+                  onPressed: () {
                     Navigator.of(context).pop();
                     GameModel model = GameModel.of(context);
                     model.refreshData();
