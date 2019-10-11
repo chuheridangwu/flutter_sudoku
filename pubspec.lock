@@ -46,6 +46,20 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  in_app_purchase:
+    dependency: "direct dev"
+    description:
+      name: in_app_purchase
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.2.1+4"
+  json_annotation:
+    dependency: transitive
+    description:
+      name: json_annotation
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.4.0"
   matcher:
     dependency: transitive
     description:
@@ -151,3 +165,4 @@ packages:
     version: "2.0.8"
 sdks:
   dart: ">=2.2.2 <3.0.0"
+  flutter: ">=1.5.0 <2.0.0"

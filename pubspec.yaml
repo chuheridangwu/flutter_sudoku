@@ -28,6 +28,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   scoped_model: ^1.0.1
+  in_app_purchase: ^0.2.1+4
 
 
 # For information on the generic Dart part of this file, see the

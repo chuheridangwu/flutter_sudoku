@@ -5,7 +5,8 @@ class LevelView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
+        child: Center(
+          child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
@@ -38,6 +39,7 @@ class LevelView extends StatelessWidget {
             ),
           ],
         ),
+        )
       ),
     );
   }
