@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sudoku/mode/mode.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
+
 
 class GameViewPage extends StatefulWidget {
   @override
@@ -11,6 +13,58 @@ class GameViewPage extends StatefulWidget {
 }
 
 class _GameViewPageState extends State<GameViewPage> {
+
+// 监听内购传值结果
+StreamSubscription<List<PurchaseDetails>> _subscription;
+
+@override
+  void initState() {
+        final Stream purchaseUpdates =
+        InAppPurchaseConnection.instance.purchaseUpdatedStream;
+    _subscription = purchaseUpdates.listen((purchases) {
+      _handlePurchaseUpdates(purchases);
+    });
+    super.initState();
+  }
+
+  // 监听付款结果
+  void _handlePurchaseUpdates(dynamic a) {
+    print(a);
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+
+  // 开始购买内购商品
+  Future startBugProduct() async {
+    // 连接店面
+    final bool available = await InAppPurchaseConnection.instance.isAvailable();
+    // if (!available) {
+      // The store cannot be reached or accessed. Update the UI accordingly.
+
+      // 获取商品信息
+      const Set<String> _kIds = {'com.dym.sudoku_1'};
+      final ProductDetailsResponse response =
+          await InAppPurchaseConnection.instance.queryProductDetails(_kIds);
+
+      // 如果商品不为空
+      if (response.productDetails.length > 0) {
+        final ProductDetails productDetails = response
+            .productDetails.last; // Saved earlier from queryPastPurchases().
+        final PurchaseParam purchaseParam =
+            PurchaseParam(productDetails: productDetails);
+        // 只对iOS进行内购
+         InAppPurchaseConnection.instance
+            .buyConsumable(purchaseParam: purchaseParam);
+      }
+      
+      List<ProductDetails> products = response.productDetails;
+    // }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
