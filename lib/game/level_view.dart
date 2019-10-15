@@ -53,7 +53,7 @@ class LevelView extends StatelessWidget {
                                     BorderRadius.all(Radius.circular(5))),
                             child: FlatButton(
                               onPressed: () {
-                                Navigator.of(context).pushNamed('/home');
+                                Navigator.of(context).pushNamed('/home',arguments: item.level);
                               },
                               child: Text(
                                 '${item.name}',

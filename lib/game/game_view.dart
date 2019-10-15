@@ -7,20 +7,19 @@ import 'package:flutter_sudoku/mode/mode.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
-
 class GameViewPage extends StatefulWidget {
   @override
   _GameViewPageState createState() => _GameViewPageState();
 }
 
 class _GameViewPageState extends State<GameViewPage> {
-
 // 监听内购传值结果
-StreamSubscription<List<PurchaseDetails>> _subscription;
+  StreamSubscription<List<PurchaseDetails>> _subscription;
+  GameModel _model = GameModel();
 
-@override
+  @override
   void initState() {
-        final Stream purchaseUpdates =
+    final Stream purchaseUpdates =
         InAppPurchaseConnection.instance.purchaseUpdatedStream;
     _subscription = purchaseUpdates.listen((purchases) {
       _handlePurchaseUpdates(purchases);
@@ -44,47 +43,51 @@ StreamSubscription<List<PurchaseDetails>> _subscription;
     // 连接店面
     final bool available = await InAppPurchaseConnection.instance.isAvailable();
     // if (!available) {
-      // The store cannot be reached or accessed. Update the UI accordingly.
+    // The store cannot be reached or accessed. Update the UI accordingly.
 
-      // 获取商品信息
-      const Set<String> _kIds = {'com.dym.sudoku_1'};
-      final ProductDetailsResponse response =
-          await InAppPurchaseConnection.instance.queryProductDetails(_kIds);
+    // 获取商品信息
+    const Set<String> _kIds = {'com.dym.sudoku_1'};
+    final ProductDetailsResponse response =
+        await InAppPurchaseConnection.instance.queryProductDetails(_kIds);
 
-      // 如果商品不为空
-      if (response.productDetails.length > 0) {
-        final ProductDetails productDetails = response
-            .productDetails.last; // Saved earlier from queryPastPurchases().
-        final PurchaseParam purchaseParam =
-            PurchaseParam(productDetails: productDetails);
-        // 只对iOS进行内购
-         InAppPurchaseConnection.instance
-            .buyConsumable(purchaseParam: purchaseParam);
-      }
-      
-      List<ProductDetails> products = response.productDetails;
+    // 如果商品不为空
+    if (response.productDetails.length > 0) {
+      final ProductDetails productDetails = response
+          .productDetails.last; // Saved earlier from queryPastPurchases().
+      final PurchaseParam purchaseParam =
+          PurchaseParam(productDetails: productDetails);
+      // 只对iOS进行内购
+      InAppPurchaseConnection.instance
+          .buyConsumable(purchaseParam: purchaseParam);
+    }
+
+    List<ProductDetails> products = response.productDetails;
     // }
   }
 
   @override
   Widget build(BuildContext context) {
+    _model.level = ModalRoute.of(context).settings.arguments;
+    _model.refreshData();
+
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.blueGrey[400],
           leading: IconButton(
             icon: Icon(Icons.pause),
             onPressed: () {
               showDialog(
                   context: context,
                   builder: (context) {
-                    return PauseShowView();
+                    return PauseShowView(_model.level);
                   });
             },
           ),
           // automaticallyImplyLeading: false,
-          title: Text('Game'),
+          title: Text('趣味数独',style: TextStyle(color: Colors.white,fontSize: 24,fontWeight: FontWeight.bold)),
         ),
         body: ScopedModel(
-          model: GameModel(),
+          model: _model,
           child: ScopedModelDescendant<GameModel>(
             builder: (context, _, model) {
               return SafeArea(
@@ -173,11 +176,12 @@ class CellView extends StatelessWidget {
                     model.fillFromTable(itemIndex, index);
                   },
                   child: Card(
-                    color: itemModel.isSelected ? Colors.red : Colors.white,
+                    color: itemModel.isSelected ? Colors.blueGrey[300] : Colors.white,
                     child: Center(
                       child: Text(
-                          (itemModel.item == 0) ? "" : '${itemModel.item}',
-                          style: TextStyle(fontSize: 16),),
+                        (itemModel.item == 0) ? "" : '${itemModel.item}',
+                        style: TextStyle(color: itemModel.isSelected ? Colors.white : Colors.black ,fontSize: 16,fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
                 ));
@@ -201,21 +205,27 @@ class OperatingView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           FlatButton(
+            shape: BeveledRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(2)),
+            ),
             onPressed: () {
               model.withdrawItem();
             },
-            color: Colors.red,
-            child: Text('撤回'),
+            color: Colors.blueGrey[400],
+            child: Text('撤回',style: TextStyle(color: Colors.white,fontSize: 16,fontWeight: FontWeight.bold)),
           ),
           SizedBox(
             width: 10.0,
           ),
           FlatButton(
+            shape: BeveledRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(2)),
+            ),
             onPressed: () {
               model.withdrawalItem();
             },
-            color: Colors.red,
-            child: Text('回撤'),
+            color: Colors.blueGrey[400],
+            child: Text('回撤',style: TextStyle(color: Colors.white,fontSize: 16,fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -249,16 +259,16 @@ class ItemView extends StatelessWidget {
                       children: <Widget>[
                         Card(
                             color:
-                                operate.isSelected ? Colors.red : Colors.white,
+                                operate.isSelected ? Colors.blueGrey[400] : Colors.white,
                             child: Center(
-                              child: Text('${operate.item}'),
+                              child: Text('${operate.item}',style: TextStyle(color: operate.isSelected ? Colors.white : Colors.black,fontSize: 16,fontWeight: FontWeight.bold),),
                             )),
                         Positioned(
-                          right: 2,
-                          top: 2,
+                          right: 3,
+                          top: 3,
                           child: Text(
                             "${operate.hideCount}",
-                            style: TextStyle(fontSize: 10),
+                            style: TextStyle(fontSize: 12,color: operate.isSelected ? Colors.white : Colors.black),
                           ),
                         )
                       ],
@@ -289,24 +299,27 @@ class _State extends State<LoveView> {
         showDialog(
             context: context,
             child: CupertinoAlertDialog(
-              title: Text('没有次数了'),
+              title: Text('当前没有次数了'),
               actions: <Widget>[
                 FlatButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                     setState(() {
-                      _loves = ["", "", ""];
+                      _loves = ["", "", "","",""];
                     });
                   },
-                  child: Text('购买生命'),
+                  child: Text('不抛弃，不放弃'),
                 ),
                 FlatButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                     GameModel model = GameModel.of(context);
                     model.refreshData();
+                    setState(() {
+                      _loves = ["", "", ""];
+                    });
                   },
-                  child: Text('再来一局'),
+                  child: Text('再接再厉'),
                 )
               ],
             ));
@@ -328,7 +341,7 @@ class _State extends State<LoveView> {
       child: Row(
         children: _loves.map((item) {
           return IconButton(
-            icon: Icon(Icons.favorite,color: Colors.red),
+            icon: Icon(Icons.favorite, color: Colors.red),
             onPressed: () {},
           );
         }).toList(),
@@ -361,6 +374,7 @@ class _TimeViewState extends State<TimeView> {
   void dispose() {
     _timer.cancel();
     _timer = null;
+    super.dispose();
   }
 
   //时间格式化，根据总秒数转换为对应的 hh:mm:ss 格式

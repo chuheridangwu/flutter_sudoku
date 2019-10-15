@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class GameModel extends Model {
-  int _level = 2; // 难度等级 显示的间隔量级，可表示难易程度，值越大越不能保证唯一性
+  int level = 2; // 难度等级 显示的间隔量级，可表示难易程度，值越大越不能保证唯一性
   VoidCallback snpTipBack;
 
   List<OperateModel> operates = []; //九宫格按钮的操作
@@ -156,6 +156,9 @@ class GameModel extends Model {
         }
         for (ItemModel item in lowAry) {
           item.isSelected = true;
+          if (item == _itemModel){
+            item.isSelected = false;
+          }
         }
         // for (ItemModel item in itemAry) {
         //   item.isSelected = true;
@@ -199,7 +202,6 @@ class GameModel extends Model {
   }
 
   void refreshData() {
-    _level = 2; // 难度等级 显示的间隔量级，可表示难易程度，值越大越不能保证唯一性
     operates = []; //九宫格按钮的操作
     selectedOperateItem = 0; // 选中的操作符
 
@@ -261,7 +263,7 @@ class GameModel extends Model {
       _dataSource.add(itemModel);
 
       // 随机隐藏个数,计算每个数现有多少个
-      if (Random().nextInt(_level) != 1) {
+      if (Random().nextInt(level) != 1) {
         itemModel.item = 0;
       } else {
         OperateModel model = operates[title - 1];

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 class PauseShowView extends StatelessWidget {
+  final int level;
+  PauseShowView(this.level);
   @override
   Widget build(BuildContext context) {
     List _lists = [
       PauseModel('下一关', () {
-        Navigator.of(context).popAndPushNamed('/home');
+        Navigator.of(context).popAndPushNamed('/home',arguments:level);
       }),
       PauseModel('选关', () {
         Navigator.of(context).popAndPushNamed('level');
