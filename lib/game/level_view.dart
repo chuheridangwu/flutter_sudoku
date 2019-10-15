@@ -14,8 +14,8 @@ class LevelView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      height: double.infinity,
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
       decoration: BoxDecoration(
         image: DecorationImage(
             image: ExactAssetImage('assets/images/level_bg.png')),
@@ -48,7 +48,7 @@ class LevelView extends StatelessWidget {
                             width: 180,
                             height: 40,
                             decoration: BoxDecoration(
-                                boxShadow: [BoxShadow(offset: Offset(2, 2))],
+                                boxShadow: [BoxShadow(offset: Offset(0, 2))],
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(5))),
                             child: FlatButton(
@@ -64,7 +64,7 @@ class LevelView extends StatelessWidget {
                               ),
                             )),
                         SizedBox(
-                          height: 10,
+                          height: 12,
                         )
                       ],
                     );

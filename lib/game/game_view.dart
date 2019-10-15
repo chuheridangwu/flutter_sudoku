@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_sudoku/game/pause_show.dart';
 import 'package:flutter_sudoku/mode/mode.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -75,33 +76,7 @@ StreamSubscription<List<PurchaseDetails>> _subscription;
               showDialog(
                   context: context,
                   builder: (context) {
-                    return Container(
-                        child: GestureDetector(
-                      child: Material(
-                        child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            IconButton(
-                              icon: Icon(Icons.close),
-                              onPressed: () {
-                                Navigator.of(context).popAndPushNamed('level');
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.add),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-
-                          ],
-                        )),
-                      ),
-                      onTap: () {
-                        Navigator.of(context).pop();
-                      },
-                    ));
+                    return PauseShowView();
                   });
             },
           ),
@@ -134,7 +109,6 @@ class GameListView extends StatelessWidget {
   Widget build(BuildContext context) {
     GameModel model = GameModel.of(context);
     model.snpTipBack = () {
-      print('11111');
       showDialog(
           context: context,
           builder: (context) {
@@ -202,7 +176,8 @@ class CellView extends StatelessWidget {
                     color: itemModel.isSelected ? Colors.red : Colors.white,
                     child: Center(
                       child: Text(
-                          (itemModel.item == 0) ? "" : '${itemModel.item}'),
+                          (itemModel.item == 0) ? "" : '${itemModel.item}',
+                          style: TextStyle(fontSize: 16),),
                     ),
                   ),
                 ));
@@ -353,7 +328,7 @@ class _State extends State<LoveView> {
       child: Row(
         children: _loves.map((item) {
           return IconButton(
-            icon: Icon(Icons.live_tv),
+            icon: Icon(Icons.favorite,color: Colors.red),
             onPressed: () {},
           );
         }).toList(),
