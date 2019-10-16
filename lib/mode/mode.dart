@@ -14,7 +14,7 @@ class GameModel extends Model {
   List<ItemModel> _dataSource = []; // 储存生成的九宫格数组
   bool isEdit = false; // 是否是编辑模式
 
-  GameModel() {
+  GameModel(this.level) {
     _initData();
   }
 
@@ -215,6 +215,7 @@ class GameModel extends Model {
 
     _initData();
     notifyListeners();
+    print('刷新数据');
   }
 
   void _initData() {

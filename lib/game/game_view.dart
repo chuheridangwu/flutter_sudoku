@@ -15,7 +15,6 @@ class GameViewPage extends StatefulWidget {
 class _GameViewPageState extends State<GameViewPage> {
 // 监听内购传值结果
   StreamSubscription<List<PurchaseDetails>> _subscription;
-  GameModel _model = GameModel();
 
   @override
   void initState() {
@@ -23,13 +22,41 @@ class _GameViewPageState extends State<GameViewPage> {
         InAppPurchaseConnection.instance.purchaseUpdatedStream;
     _subscription = purchaseUpdates.listen((purchases) {
       _handlePurchaseUpdates(purchases);
-    });
+    },onDone: (){
+      print('完成');
+    },onError: (error){
+      print('有错误');
+    },cancelOnError: false);
     super.initState();
   }
 
   // 监听付款结果
-  void _handlePurchaseUpdates(dynamic a) {
-    print(a);
+  void _handlePurchaseUpdates(List<PurchaseDetails> purchaseDetailsList) {
+    purchaseDetailsList.forEach((PurchaseDetails purchaseDetails) async {
+      if (purchaseDetails.status == PurchaseStatus.pending) {
+  print('正在购买');
+      } else {
+        if (purchaseDetails.status == PurchaseStatus.error) {
+//          handleError(purchaseDetails.error);
+        print('出现错误');
+        } else if (purchaseDetails.status == PurchaseStatus.purchased) {
+          print('已购买');
+//          bool valid = await _verifyPurchase(purchaseDetails);
+//          if (valid) {
+//            deliverProduct(purchaseDetails);
+//          } else {
+//            _handleInvalidPurchase(purchaseDetails);
+//          }
+        }
+//        if (Platform.isIOS) {
+          InAppPurchaseConnection.instance.completePurchase(purchaseDetails);
+//        } else if (Platform.isAndroid) {
+//          if (!kAutoConsume && purchaseDetails.productID == _kConsumableId) {
+//            InAppPurchaseConnection.instance.consumePurchase(purchaseDetails);
+//          }
+//        }
+      }
+    });
   }
 
   @override
@@ -67,15 +94,17 @@ class _GameViewPageState extends State<GameViewPage> {
 
   @override
   Widget build(BuildContext context) {
-    _model.level = ModalRoute.of(context).settings.arguments;
-    _model.refreshData();
-
+//    _model.level = ModalRoute.of(context).settings.arguments;
+//    _model.refreshData();
+GameModel _model = GameModel(ModalRoute.of(context).settings.arguments);
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.blueGrey[400],
           leading: IconButton(
             icon: Icon(Icons.pause),
             onPressed: () {
+//              startBugProduct();
+//              print('kaishigoumai');
               showDialog(
                   context: context,
                   builder: (context) {
@@ -257,12 +286,17 @@ class ItemView extends StatelessWidget {
                   ? Container()
                   : Stack(
                       children: <Widget>[
-                        Card(
+                        Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [BoxShadow(color: Color(0x99FFFF00), offset: Offset(5.0, 5.0),    blurRadius: 10.0, spreadRadius: 2.0), BoxShadow(color: Color(0x9900FF00), offset: Offset(1.0, 1.0)), BoxShadow(color: Color(0xFF0000FF))]
+                          ),
+                          child: Card(
                             color:
                                 operate.isSelected ? Colors.blueGrey[400] : Colors.white,
                             child: Center(
                               child: Text('${operate.item}',style: TextStyle(color: operate.isSelected ? Colors.white : Colors.black,fontSize: 16,fontWeight: FontWeight.bold),),
                             )),
+                        ),
                         Positioned(
                           right: 3,
                           top: 3,
